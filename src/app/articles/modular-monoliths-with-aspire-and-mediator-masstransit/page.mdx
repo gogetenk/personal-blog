@@ -1,0 +1,182 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+
+export const article = {
+  author: 'Yannis Tocreau',
+  date: '2024-12-13',
+  title: 'Modular Monoliths in .NET using Masstransit.Mediator: The architecture for MVP addicts',
+  description:
+    'If you’ve ever shipped more MVPs in a year than Elon Musk has launched rockets, you know the drill: building a fully distributed microservices architecture for a prototype is like buying a Ferrari to drive to your mailbox. It’s expensive, overkill, and you’ll spend more time tuning the engine than actually going anywhere.',
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+**Title: Modular Monoliths in .NET: The Goldilocks Architecture for MVP Addicts**  
+
+**Introduction**  
+
+If you’ve ever shipped more MVPs in a year than Elon Musk has launched rockets, you know the drill: building a fully distributed microservices architecture for a prototype is like buying a Ferrari to drive to your mailbox. It’s expensive, overkill, and you’ll spend more time tuning the engine than actually going anywhere.  
+
+But what if you could build a monolith that’s *quietly prepared* to become microservices—without rewriting half your codebase? Enter the **Modular Monolith**: the architectural equivalent of keeping your options open while still wearing sweatpants.  
+
+Today, we’ll explore how to build one in .NET using **Aspire** for dependency orchestration and **MassTransit.Mediator** for in-process messaging (spoiler: it’s just *really organized function calls*). And yes, we’ll flip it to microservices with *one config change*. Let’s go.  
+
+---
+
+## 1. **Monoliths vs. Microservices vs. Modular Monoliths: A Drama in Three Acts**  
+
+### **The Classic Monolith**  
+- **Pros**: Simple to deploy, easy to debug, great for "move fast and (maybe) break things."  
+- **Cons**: Turns into a Jenga tower of doom. Scaling? Good luck.  
+
+### **Microservices**  
+- **Pros**: Scalable, fault-tolerant, makes your résumé look fancy.  
+- **Cons:** You’ll spend 80% of your time on DevOps, distributed tracing, and existential dread about eventual consistency.  
+
+### **Modular Monoliths**  
+- **The Sweet Spot**:  
+  - **Modules** are isolated by domain (e.g., `Orders`, `Payments`, `Inventory`).  
+  - **Communication** happens via in-process messages (no HTTP overhead!).  
+  - **Deployment**: One app, but designed to split into services later.  
+
+|                      | Monolith       | Modular Monolith       | Microservices          |  
+|----------------------|----------------|------------------------|------------------------|  
+| **Complexity**       | Low            | Moderate               | High                   |  
+| **Deployment**       | 1-click        | 1-click                | 47-step CI/CD pipeline |  
+| **Scalability**      | Vertical only  | Vertical + *prepped*   | Horizontal             |  
+| **Team Coordination**| Yelling        | Polite Slack threads   | Treaty negotiations    |  
+
+---
+
+## 2. **Why Modular Monoliths Don’t Suck**  
+
+A Modular Monolith is like a Swiss Army knife:  
+1. **Bounded Contexts**: Each module owns its data and logic (thanks, Domain-Driven Design!).  
+2. **In-Process Messaging**: Modules chat via messages (e.g., `OrderPlacedEvent`), but it’s *just method calls* under the hood.  
+3. **Aspire’s Glue**: Handles dependencies (databases, Redis) so you don’t have to play DevOps Jenga.  
+
+**The Secret Sauce**: Using **MassTransit.Mediator**, your modules communicate with the same patterns you’d use for microservices—just without the network hops. Later, swap the mediator for a message broker (RabbitMQ, Azure Service Bus), and boom: microservices.  
+
+---
+
+## 3. **Building a Modular Monolith: From Zero to (Almost) Hero**  
+
+### **Step 1: Define Your Modules**  
+Imagine an e-commerce app:  
+- **Orders Module**: Creates orders.  
+- **Inventory Module**: Reserves stock.  
+
+```csharp  
+// Orders Module  
+public class OrderModule : IModule  
+{  
+    public void Configure(IApplicationBuilder app)  
+    {  
+        app.UseEndpoints(endpoints =>  
+        {  
+            endpoints.MapPost("/orders", async (CreateOrderCommand command, IMediator mediator) =>  
+            {  
+                await mediator.Send(command);  
+            });  
+        });  
+    }  
+}  
+
+// Inventory Module  
+public class InventoryModule : IModule  
+{  
+    public void Configure(IApplicationBuilder app)  
+    {  
+        // Subscribe to OrderPlacedEvent  
+        app.UseMassTransit(mt =>  
+        {  
+            mt.AddConsumer<ReserveStockConsumer>();  
+        });  
+    }  
+}  
+```  
+
+### **Step 2: Wire Up Messages with MassTransit.Mediator**  
+```csharp  
+// CreateOrderCommand (in Orders module)  
+public record CreateOrderCommand(Guid ProductId, int Quantity);  
+
+// OrderPlacedEvent (published by Orders module)  
+public record OrderPlacedEvent(Guid OrderId, Guid ProductId, int Quantity);  
+
+// ReserveStockConsumer (in Inventory module)  
+public class ReserveStockConsumer : IConsumer<OrderPlacedEvent>  
+{  
+    public async Task Consume(ConsumeContext<OrderPlacedEvent> context)  
+    {  
+        // Reserve stock logic here  
+        Console.WriteLine($"Reserving {context.Message.Quantity} of product {context.Message.ProductId}");  
+    }  
+}  
+```  
+
+**Key Point**: This is *in-process*. No HTTP, no gRPC, no serialization—just direct method calls. Performance? Yes.  
+
+---
+
+## 4. **The Magic Flip: From Monolith to Microservices**  
+
+When scaling becomes a *~business requirement~* (read: your CEO watched a TikTok about Kubernetes), reconfigure MassTransit to use a message broker:  
+
+```csharp  
+// In Aspire’s AppHost (Program.cs)  
+var builder = DistributedApplication.CreateBuilder(args);  
+
+var orders = builder.AddProject<OrdersModule>("orders");  
+var inventory = builder.AddProject<InventoryModule>("inventory");  
+
+// Switch mediator to RabbitMQ  
+builder.AddRabbitMQ("rabbitmq");  
+
+// Update modules to use RabbitMQ  
+orders.WithReference(builder.GetRabbitMQConnection("rabbitmq"));  
+inventory.WithReference(builder.GetRabbitMQConnection("rabbitmq"));  
+```  
+
+**What changes?**  
+- **Orders** and **Inventory** become separate services.  
+- `OrderPlacedEvent` now publishes to RabbitMQ instead of in-process.  
+- **Zero code changes**. Just configuration.  
+
+---
+
+## 5. **When to Use This (and When to Run Away)**  
+
+**Perfect For**:  
+- Startups that need to pivot faster than a TikTok trend.  
+- Teams allergic to YAML files (looking at you, Kubernetes).  
+- Systems where *some* parts need to scale independently (e.g., payments vs. analytics).  
+
+**Avoid If**:  
+- You’re building the next AWS (but let’s be real—you’re not).  
+- Your team thinks “eventual consistency” is a type of yoga.  
+
+---
+
+**Conclusion: Monoliths Can Be Cool Too**  
+
+Modular monoliths are the architectural equivalent of meal-prepping: do the hard work upfront, and future-you will high-five past-you. With Aspire and MassTransit, you get the simplicity of a monolith today and the scalability of microservices tomorrow.  
+
+And let’s be honest—if your biggest problem is scaling, that means your app is *working*. Celebrate that.  
+
+---  
+
+**Yannis**  
+*.NET Architect & Serial MVP Launcher*  
+*Currently refactoring a monolith into a modular monolith so I can take a nap later.*  
+
+---  
+
+**Liked This?**  
+- **Star my Aspire demo repo** (it has 127 TODO comments and 1 working endpoint).  
+- **Follow me on X** (@NoYAMLRequired) for hot takes on why Kubernetes is overrated.  
+- **Subscribe** for more ways to avoid DevOps burnout.

@@ -1,0 +1,190 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+import designSystem from './planetaria-design-system.png'
+
+export const article = {
+  author: 'Yannis Tocreau',
+  date: '2025-01-04',
+  title: 'Blazor 8+ InteractiveAuto: Calling your backend with auth (without losing your mind)',
+  description:
+    'Blazor’s new InteractiveAuto render mode is like that friend who insists they’re "low maintenance" but secretly requires a 12-step skincare routine. It promises the best of both worlds (server-side prerendering + client-side interactivity), but when you add authentication? Chaos ensues.',
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+## How I Stopped Worrying and Learned to Authenticate in Hybrid Mode
+
+<Image src={designSystem} alt="" />
+
+---
+
+**Introduction**
+
+Blazor’s new **InteractiveAuto** render mode is like that friend who insists they’re "low maintenance" but secretly requires a 12-step skincare routine. It promises the best of both worlds (server-side prerendering + client-side interactivity), but when you add authentication? *Chaos ensues.*
+
+After a weekend-long battle involving duplicate API calls, mysterious login redirects, and an existential crisis about bearer tokens vs cookies, I emerged (mostly) victorious. Below, we’ll walk through the *real* issue: **how to unify your authentication** so HTTP calls work reliably whether you’re in a server prerender or full-blown WebAssembly mode. Tools like **YARP** can help unify endpoints, but let’s be clear: the real challenge is making sure your auth is consistent across both modes.
+
+---
+
+## 1. Blazor Render Modes: A Crash Course
+
+Blazor (in .NET 8) offers four distinct "personalities" for how your components get rendered and interacted with:
+
+1. **Static**
+    - Renders once, no interactivity.
+    - Perfect for static pages—no authentication complexities here.
+2. **InteractiveServer**
+    - Real-time interaction using SignalR.
+    - Typically uses server-side cookie authentication.
+    - Can quickly become resource-heavy (each user session ties up server resources).
+3. **InteractiveWebAssembly**
+    - Runs entirely on the client.
+    - Loves bearer tokens for API calls.
+    - Storing tokens in the browser brings security considerations.
+4. **InteractiveAuto**
+    - The "hybrid" mode. Starts with server-side prerender (which typically uses cookies), then flips to client-side WebAssembly (which typically uses tokens).
+    - The best of both worlds… or the worst, if your auth strategy isn’t bulletproof.
+
+**Problem:** When your Blazor component starts on the server but finishes on the client, you’re mixing cookie-based auth (server) with token-based auth (client). This leads to confusion and—often—double API calls.
+
+---
+
+## 2. Why InteractiveAuto Makes Auth Tricky
+
+### 2.1 The Double-Render Trap
+
+"Prerender" means the server runs your component’s logic, produces HTML, and sends it to the browser. Then, once the WebAssembly code loads, the browser *re-renders* the component. That means:
+
+1. **Server pass**: Uses server-side cookies for any protected endpoints.
+2. **Client pass**: WebAssembly now tries to fetch data (again), typically using tokens.
+
+```
+[Server prerender]
+   └── Auth via Cookies
+
+[Client (WASM)]
+   └── Auth via Bearer Tokens
+```
+
+Result: **Same code** can call the same endpoint **twice**. The second call may fail if your client logic expects a token it doesn’t yet have.
+
+### 2.2 Couldn’t I Just Switch to Full InteractiveWebAssembly (No Prerender)?
+
+One way to sidestep the server-then-client "double auth" headache is to remove server prerendering entirely and run **purely** in WebAssembly mode from the start. For example:
+
+```csharp
+@rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)"
+```
+
+**What happens then?**
+
+1. **No Server Prerender**
+    - Your app won’t produce any server-rendered HTML for the initial load. Instead, the browser immediately downloads the WASM code and runs everything client-side.
+2. **Single Auth Mechanism**
+    - You only need to manage bearer tokens (or whichever client-side auth approach you use).
+    - No more cookie vs token confusion.
+
+**Downside**:
+
+- **Very slow first render**. Users often see a blank screen or a "Loading…" message until WebAssembly downloads and spins up. Depending on app size, this can feel "unacceptably" slow for many production scenarios.
+
+Hence, **pure InteractiveWebAssembly with no prerender** *does* solve the double auth issue at the cost of initial performance. For many teams, that’s a deal-breaker, which is why **InteractiveAuto** (server prerender + WASM) is so tempting—despite the complexities.
+
+### 2.3 Other Modes Eventually Run on the Server
+
+Aside from going "all-in" on WASM with no prerender, **every other Blazor mode** (InteractiveAuto, InteractiveServer, or even InteractiveWebAssembly *with* partial prerender) involves at least one server-side pass. This is where:
+
+- The server might rely on cookie-based auth.
+- The client portion eventually wants a bearer token.
+- Uncoordinated calls can fail or trigger double-fetch issues.
+
+If you **must** have a fast first render (server prerender) and *also* want to run client-side later, expect to handle the cookie→token handoff carefully—or risk those "HTML login pages" or "401 fails" mid-application.
+
+---
+
+## 3. Strategy for Unified Auth in InteractiveAuto
+
+### 3.1 Minimizing Double API Calls
+
+To avoid making the same call twice, you can:
+
+- **Cache data fetched during prerender** in a shared service or state.
+- **Skip** certain calls on the client if you know you already have the data from the server.
+
+**Example**: If you fetch a user’s profile in `OnInitializedAsync()` on the server, store it in a scoped service. When the client picks up, it checks for existing data before calling the endpoint again.
+
+### 3.2 Handoff of Credentials
+
+Ideally, your server prerender can obtain a token (via the user’s cookie session) and *inject* that token into the client environment. Then the client can use that token to call your APIs going forward. Or, you can do the actual calls from the server side behind the scenes if your architecture allows—this can prevent the token from ever reaching the client.
+
+**However**, if you truly need your client to talk directly to external APIs, then the client needs some form of token. That’s where short-lived or restricted-scopes tokens become important, as well as the usual XSS mitigations.
+
+---
+
+## 4. Why Using the Same Blazor Server as an API Can Fail
+
+Here’s a crucial snag many of us hit: **why not just build all your endpoints into the Blazor Server app itself?** In theory, you’d call them from your Blazor components during both server prerender and client-side phases. But in practice:
+
+- If you have **redirect-based** authentication (like Auth0 or a standard ASP.NET Core cookie auth challenge), the server typically *redirects* unauthenticated requests to a login page.
+- During prerender, your Blazor Server code might *think* it’s fully authenticated—yet when you make an HTTP request to the same server from the server’s own code path, you can get a 302 redirect to a login page (or a 406 if you suppress redirect responses).
+- Configuring a **second authentication scheme** or disabling redirects often leads to partial or broken flows, especially for external auth providers.
+
+**Outcome**: Instead of a clean JSON response, you end up with an HTML login page (or a 406 error) when you expected JSON data. This breaks your client code and generally causes frustration.
+
+**In short**, using the same Blazor Server as a “backend API” can be *far more complicated* than you might expect—particularly under InteractiveAuto.
+
+---
+
+## 5. How a Separate Backend API & Proxy Helps
+
+A simpler solution is to **host a full ASP.NET Core API** *outside* the Blazor Server process and then reroute calls to it. That’s where a reverse proxy (e.g., YARP) or any other gateway technology comes in:
+
+1. **Separate API**: Run your “real” Web API as an independent service that can handle bearer tokens (or whatever auth mechanism you want).
+2. **Blazor Server**: Focus on rendering the UI (server prerender + WASM handoff).
+3. **Proxy Routing**: If your Blazor Server *does* need to call the API during server prerender, it can do so via an HTTP call to the separate API. The same goes for client-side calls, which can just go to the same `/api/` path—YARP will forward them to the external service.
+
+Because the separate API isn’t trying to serve HTML for your Blazor pages, you avoid the *login-page-HTML-as-a-response* problem. If the request lacks valid credentials, the API can respond with a proper `401` or `403` rather than a redirect.
+
+---
+
+## 6. The Naked Truth About InteractiveAuto
+
+You’ll still see your code run twice—once on the server, once on the client. If you aren’t careful, that can mean two identical requests to your API. And if your server prerender uses cookie auth while your client uses bearer tokens, you might see:
+
+1. A successful server response (using your `.AspNetCore.Cookies` session).
+2. A failed client response ("Unauthorized") if the token isn’t set up yet.
+
+**How to survive**:
+
+1. **Conditionally skip calls** on the client if you already have the data.
+2. **Use a single data service** that caches the result from the server pass.
+3. **Inject the auth token** from server to client so your code has a valid bearer token as soon as the WASM runtime boots up.
+4. **Consider a separate backend** so you can handle JSON-based auth flows without messing up Blazor’s HTML-based login logic.
+
+---
+
+## Final Verdict
+
+**InteractiveAuto** is brilliant for a fast first paint and a quick transition to client interactivity, but it complicates authentication because you effectively have *two environments* (server + client). **Cookies** are great on the server; **tokens** are typically required in the client. If you don’t design carefully, you’ll get double calls, partial data, or weird 406 errors.
+
+1. **Unify your auth** by bridging cookies to tokens when the client loads, or keep calls behind the server.
+2. **Avoid double calls** by caching data from prerender.
+3. **Use a separate backend if needed** to avoid the HTML login page problem.
+4. **(Optional)** Add a proxy (e.g., YARP) to centralize calls to that backend—just know it *won’t* fix double-render by itself.
+
+---
+
+**Conclusion**
+
+You don’t have to choose between "slow WASM-only" or "fragile server prerender" if you handle the authentication transition with care. **InteractiveAuto** can be your friend, but only if you:
+
+- Plan a strategy to hand off user identity from the server to the client (cookie → token).
+- Store tokens safely (or rely on the server to handle calls).
+- Prevent repeated or expensive API calls by sharing data between prerender and client.
+- Keep your API separate if you can’t tame the *login-page-as-a-response* issue.
+
+*Got war stories about Blazor auth? Share them below 👇. And if this saved your weekend, [buy me a coffee](https://buymeacoffee.com/blazorwarrior) — I’ll need it for the next framework update.*
