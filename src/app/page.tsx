@@ -262,7 +262,6 @@ export default async function Home() {
           <strong>Permanently remote since before it was cool</strong>, because pants are overrated.
         </p>
         <div className="mt-6 flex gap-6">
-          <SocialLink href="#" aria-label="Follow on X" icon={XIcon} />
           <SocialLink 
             href="https://github.com/gogetenk" 
             aria-label="Follow on GitHub" 
