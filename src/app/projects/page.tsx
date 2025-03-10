@@ -4,11 +4,13 @@ import Image from 'next/image'
 import { Card } from '@/components/Card'
 import { SimpleLayout } from '@/components/SimpleLayout'
 import { Badge } from '@/components/ui/badge'
-import logoAnimaginary from '@/images/logos/animaginary.svg'
+import logoPublishy from '@/images/logos/publishy.jpg'
 import logoCosmos from '@/images/logos/cosmos.svg'
 import logoHelioStream from '@/images/logos/helio-stream.svg'
-import logoOpenShuttle from '@/images/logos/open-shuttle.svg'
+import logoDigitime from '@/images/logos/digitime.svg'
 import logoPlanetaria from '@/images/logos/cryptocard.svg'
+import logoPadelCompanion from '@/images/logos/padelCompanion.png'
+import logoOpenShuttle from '@/images/logos/open-shuttle.svg'
 
 const projects = [
   
@@ -24,7 +26,7 @@ const projects = [
     description:
       'An AI agent for solopreneurs and small businesses. Automates and scales unique content creation (texts, images, videos) with AI, effortlessly.',
     link: { href: 'https://publishy.ai', label: 'publishy.ai' },
-    logo: logoAnimaginary,
+    logo: logoPublishy,
     technologies: ['Blazor WebApp', 'OpenAI']
   },
   {
@@ -40,7 +42,7 @@ const projects = [
   description:
     'AI-powered backlog generation for Agile teams. Describe your project in natural language, and let AgileMind create structured user stories ready for your favorite project management tool.',
   link: { href: 'https://agilemind.ai', label: 'agilemind.ai' },
-  logo: logoCosmos,
+  logo: logoOpenShuttle,
   technologies: ['OpenAI', 'Blazor WebApp']
 },
   {
@@ -48,14 +50,14 @@ const projects = [
     description:
       'A simple way for freelancers to fill up their monthly timesheet, and for customers to approve them. This is a repetitive, mandatory step for all freelancers before sending an invoice.',
     link: { href: 'https://digitime.app', label: 'https://digitime.app' },
-    logo: logoOpenShuttle,
+    logo: logoDigitime,
     technologies: ['Blazor WASM', 'Mongo DB']
   },{
     name: 'Padel companion',
     description:
       'A SaaS for tennis and padel clubs, combining yield management, flexible cancellations, and a universal loyalty program for small clubs and associations.',
     link: { href: '', label: 'coming soon...' },
-    logo: logoOpenShuttle,
+    logo: logoPadelCompanion,
     technologies: ['Blazor WebApp', 'Modular Monolith']
   }
 ]
@@ -73,13 +75,13 @@ function LinkIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 
 export const metadata: Metadata = {
   title: 'Projects',
-  description: "Things I've made over the years.",
+  description: "Things I've made over the years",
 }
 
 export default function Projects() {
   return (
     <SimpleLayout
-      title="Things I've made over the years."
+      title="Things I've made over the years"
       intro="I've worked on tons of little projects over the years but these are the ones that I'm most proud of. Spoiler alert: nothing made me rich yet."
     >
       <ul
@@ -92,7 +94,7 @@ export default function Projects() {
               <Image
                 src={project.logo}
                 alt=""
-                className="h-8 w-8"
+                className={`h-8 w-8 ${project.name === 'Publishy' || project.name === 'Padel companion' ? 'bg-white rounded-full' : ''}`}
                 unoptimized
               />
             </div>
