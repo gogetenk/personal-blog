@@ -9,15 +9,10 @@ export const metadata: Metadata = {
   title: {
     template: '%s - Yannis Tocreau',
     default:
-      'Yannis Tocreau - Software designer, founder, and amateur astronaut',
+      'Yannis Tocreau - Software engineer, architect & remote work advocate',
   },
   description:
-    'I’m Yannis, a software designer and entrepreneur based in New York City. I’m the founder and CEO of Planetaria, where we develop technologies that empower regular people to explore space on their own terms.',
-  alternates: {
-    types: {
-      'application/rss+xml': `${process.env.NEXT_PUBLIC_SITE_URL}/feed.xml`,
-    },
-  },
+    "I'm Yannis, a passionate software engineer specializing in .NET ecosystems and cloud-native architectures. By day, I build mission-critical systems for international enterprises while promoting clean code practices and sustainable software design. By night, I compulsively spawn side projects like there's a GitHub repo shortage (judge them yourself here). Permanently remote since before it was cool, because pants are overrated.",
 }
 
 export default function RootLayout({
