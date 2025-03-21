@@ -5,6 +5,13 @@ import { SimpleLayout } from '@/components/SimpleLayout'
 export const metadata: Metadata = {
   title: 'You’re subscribed',
   description: 'Thanks for subscribing to my newsletter.',
+  openGraph: {
+    images: '/images/portrait.jpg',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: '/images/portrait.jpg',
+  },
 }
 
 export default function ThankYou() {

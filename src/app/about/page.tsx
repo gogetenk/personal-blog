@@ -50,8 +50,15 @@ function MailIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'I’m Yannis Tocreau. I live in New York City, where I design the future.',
-}
+    'I’m Yannis, and my journey started from a cardboard fork dispenser.',
+    openGraph: {
+      images: '/images/portrait.jpg',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: '/images/portrait.jpg',
+    },
+  }
 
 export default function About() {
   return (

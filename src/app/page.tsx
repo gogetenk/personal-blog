@@ -8,7 +8,6 @@ import { Container } from '@/components/Container'
 import {
   GitHubIcon,
   LinkedInIcon,
-  XIcon,
 } from '@/components/SocialIcons'
 import logoAirbnb from '@/images/logos/airbnb.svg'
 import logoEdenred from '@/images/logos/edenred_logo.jpg'
@@ -255,11 +254,13 @@ export default async function Home() {
           .NET Software Engineer, Architect & Remote Work Advocate
         </h1>
         <p className="mt-6 text-base text-zinc-600 dark:text-zinc-400">
-          I'm Yannis, a passionate software engineer specializing in .NET ecosystems and cloud-native architectures. 
-          By day, I build mission-critical systems for international enterprises while promoting 
-          clean code practices and sustainable software design. By night, I compulsively 
-          spawn side projects like there's a GitHub repo shortage (judge them yourself <Link href="/projects" className="text-teal-500 hover:text-teal-600">here</Link>). <br />
-          <strong>Permanently remote since before it was cool</strong>, because pants are overrated.
+          I’m Yannis, a .NET enthusiast and passionate developer. By day, I build mission-critical 
+          systems for global organizations, coach and mentor developers, and focus on clean code and reliability. By night, 
+          I launch side projects with unstoppable curiosity (feel free to check them out 
+          <Link href="/projects" className="text-teal-500 hover:text-teal-600">here</Link>).
+          <br />
+          <strong>Working remotely long before it was trendy</strong>. Some call it foresight, 
+          I call it the right to wear slippers.
         </p>
         <div className="mt-6 flex gap-6">
           <SocialLink 

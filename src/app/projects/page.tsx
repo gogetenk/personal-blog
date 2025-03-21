@@ -5,7 +5,6 @@ import { Card } from '@/components/Card'
 import { SimpleLayout } from '@/components/SimpleLayout'
 import { Badge } from '@/components/ui/badge'
 import logoPublishy from '@/images/logos/publishy.jpg'
-import logoCosmos from '@/images/logos/cosmos.svg'
 import logoHelioStream from '@/images/logos/helio-stream.svg'
 import logoDigitime from '@/images/logos/digitime.svg'
 import logoPlanetaria from '@/images/logos/cryptocard.svg'
@@ -76,13 +75,20 @@ function LinkIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 export const metadata: Metadata = {
   title: 'Projects',
   description: "Things I've made over the years",
+  openGraph: {
+    images: '/images/portrait.jpg',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: '/images/portrait.jpg',
+  },
 }
 
 export default function Projects() {
   return (
     <SimpleLayout
       title="Things I've made over the years"
-      intro="I've worked on tons of little projects over the years but these are the ones that I'm most proud of. Spoiler alert: nothing made me rich yet."
+      intro="I've worked on tons of little projects over the years but these are the ones that I'm most proud of. Spoiler alert: none of them made me rich yet."
     >
       <ul
         role="list"
