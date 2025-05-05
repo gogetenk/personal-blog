@@ -88,6 +88,18 @@ function ArrowDownIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 function Article({ article }: { article: ArticleWithSlug }) {
   return (
     <Card as="article">
+      {article.image && (
+        <div className="relative mb-4 aspect-[3/2] w-full overflow-hidden rounded-lg" style={{ zIndex: 20 }}>
+          <Image
+            src={article.image}
+            alt={article.title}
+            className="object-cover"
+            fill
+            sizes="(min-width: 1024px) 32rem, 20rem"
+            priority={false}
+          />
+        </div>
+      )}
       <Card.Title href={`/articles/${article.slug}`}>
         {article.title}
       </Card.Title>

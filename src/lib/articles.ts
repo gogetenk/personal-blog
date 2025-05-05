@@ -5,6 +5,7 @@ interface Article {
   description: string
   author: string
   date: string
+  image?: any // Référence à l'image importée dans l'article MDX
 }
 
 export interface ArticleWithSlug extends Article {

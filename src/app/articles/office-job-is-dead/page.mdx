@@ -1,4 +1,5 @@
 import { ArticleLayout } from '@/components/ArticleLayout'
+import designSystem from './office-job-is-dead.png'
 
 export const article = {
   author: 'Yannis Tocreau',
@@ -6,6 +7,7 @@ export const article = {
   title: 'The office job is already dead (and that’s a good thing)',
   description:
     'The traditional office is on life support. While some companies cling to the idea of a centralized workspace, the reality is that remote work has fundamentally changed how we think about productivity, collaboration, and even the concept of "workplace culture." I’ve been a remote worker since before it became mainstream, and I can confidently say: the office, as we knew it, is over.',
+  image: designSystem
 }
 
 export const metadata = {
@@ -15,7 +17,8 @@ export const metadata = {
 
 export default (props) => <ArticleLayout article={article} {...props} />
 
-**Title: The Office Job Is Already Dead (And That’s a Good Thing)**  
+<Image src={designSystem} alt="" />
+
 
 **Introduction**  
 
@@ -87,16 +90,3 @@ But it’s not just about personal convenience. Remote work represents a fundame
 
 **Final Thought:**  
 The office isn’t dead because remote work is easier. It’s dead because it’s no longer necessary. And that’s not just okay—it’s progress.  
-
----  
-
-**Yannis**  
-*.NET Architect, Remote Work Advocate & Pants-Free Since 2017*  
-*Currently writing this from a café in Lisbon, because why not?*  
-
----  
-
-**Liked This?**  
-- **Subscribe** for more insights on remote work, tech trends, and the future of productivity.  
-- **Follow me on GitHub** for projects that explore the intersection of technology and remote work.  
-- **Connect with me on LinkedIn** to join the conversation about the future of work.

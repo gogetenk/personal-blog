@@ -1,4 +1,5 @@
 import { type Metadata } from 'next'
+import Image from 'next/image'
 
 import { Card } from '@/components/Card'
 import { SimpleLayout } from '@/components/SimpleLayout'
@@ -9,6 +10,18 @@ function Article({ article }: { article: ArticleWithSlug }) {
   return (
     <article className="md:grid md:grid-cols-4 md:items-baseline">
       <Card className="md:col-span-3">
+        {article.image && (
+          <div className="relative mb-4 aspect-[3/2] w-full overflow-hidden rounded-lg" style={{ zIndex: 20 }}>
+            <Image
+              src={article.image}
+              alt={article.title}
+              className="object-cover"
+              fill
+              sizes="(min-width: 1024px) 32rem, 20rem"
+              priority={false}
+            />
+          </div>
+        )}
         <Card.Title href={`/articles/${article.slug}`}>
           {article.title}
         </Card.Title>
