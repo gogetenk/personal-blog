@@ -1,4 +1,5 @@
 import { ArticleLayout } from '@/components/ArticleLayout'
+import designSystem from './modular-monoliths.png'
 
 export const article = {
   author: 'Yannis Tocreau',
@@ -6,6 +7,7 @@ export const article = {
   title: 'Modular Monoliths in .NET using Masstransit.Mediator: The architecture for MVP addicts',
   description:
     'If you’ve ever shipped more MVPs in a year than Elon Musk has launched rockets, you know the drill: building a fully distributed microservices architecture for a prototype is like buying a Ferrari to drive to your mailbox. It’s expensive, overkill, and you’ll spend more time tuning the engine than actually going anywhere.',
+  image: designSystem
 }
 
 export const metadata = {
@@ -15,9 +17,7 @@ export const metadata = {
 
 export default (props) => <ArticleLayout article={article} {...props} />
 
-**Title: Modular Monoliths in .NET: The Goldilocks Architecture for MVP Addicts**  
-
-**Introduction**  
+## The architecture for MVP addicts
 
 If you’ve ever shipped more MVPs in a year than Elon Musk has launched rockets, you know the drill: building a fully distributed microservices architecture for a prototype is like buying a Ferrari to drive to your mailbox. It’s expensive, overkill, and you’ll spend more time tuning the engine than actually going anywhere.  
 
@@ -162,21 +162,8 @@ inventory.WithReference(builder.GetRabbitMQConnection("rabbitmq"));
 
 ---
 
-**Conclusion: Monoliths Can Be Cool Too**  
+## Conclusion: Monoliths can be cool too  
 
 Modular monoliths are the architectural equivalent of meal-prepping: do the hard work upfront, and future-you will high-five past-you. With Aspire and MassTransit, you get the simplicity of a monolith today and the scalability of microservices tomorrow.  
 
 And let’s be honest—if your biggest problem is scaling, that means your app is *working*. Celebrate that.  
-
----  
-
-**Yannis**  
-*.NET Architect & Serial MVP Launcher*  
-*Currently refactoring a monolith into a modular monolith so I can take a nap later.*  
-
----  
-
-**Liked This?**  
-- **Star my Aspire demo repo** (it has 127 TODO comments and 1 working endpoint).  
-- **Follow me on X** (@NoYAMLRequired) for hot takes on why Kubernetes is overrated.  
-- **Subscribe** for more ways to avoid DevOps burnout.

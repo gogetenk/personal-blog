@@ -1,0 +1,292 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+import designSystem from './how-I-generaed-10k-landing-pages-for-local-businesses2.png'
+import brevo from './brevo.png'
+import template from './template.png'
+import flow from './flow.png'
+import visiters from './visiters.png'
+import lmStudio from './lm-studio.png'
+import channels from './channels.png'
+import enricher from './enricher.png'
+
+export const article = {
+  author: 'Yannis Tocreau',
+  date: '2025-05-09',
+  title: 'I’ll show you how I generated 10.000 landing pages for local businesses using Scraping tools, AI and Vercel and pitch them to them',
+  description:
+    'How I used AI, Next.js and automation to build & pitch custom landing pages to 10,000+ local businesses in France - with real metrics and lessons learned.',
+  image: designSystem
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+<Image src={designSystem} alt="" />
+
+> "I build websites for local businesses by looking up their Google Business Profiles and contacting them directly—with the website already done."
+
+This Reddit thread hit me like lightning: why not scale this to **10,000+ businesses**? What if I created their site first — and pitched it after?
+
+My journey began with this spark of inspiration. I wondered: *What if I could automatically build a custom website for a local business and then pitch it to them?* The idea was to go beyond simple programmatic SEO and actively *outreach* to potential clients with a personalized demo site. The result? A full-stack experiment that involved scraping leads, AI-powered content generation, dynamic Next.js pages, and automated SMS campaigns.
+
+To put this in perspective, France alone has over 1 million SMEs, and surprisingly, about 30% of them still don't have a website. That's a Total Addressable Market (TAM) of **300,000 businesses just in France!**
+
+**Picture this: 300,000 French businesses still don't have websites. That's like every resident of Bordeaux needing a site tomorrow. I built a machine to claim just 1% of that.**
+
+Even with a modest 1% conversion rate, that's 3,000 potential clients. Scale this globally to other countries with similar digital adoption gaps, and you're looking at millions of businesses that could benefit from this approach. This is the kind of opportunity that gets me excited - even a tiny success rate could build a sustainable business.
+
+Of course, turning this concept into reality meant tackling several critical challenges:
+
+1. **Targeted Lead Generation**: Finding phone numbers for very specific targets (SMEs without websites) at scale. Most scraping tools don't filter by "businesses lacking websites" as a criterion.
+
+2. **Technical Scalability**: Building a solution that could handle thousands of sites without massive hosting costs. Traditional hosting would be prohibitively expensive.
+
+3. **Unique Content Creation**: Generating truly unique, business-specific content for each site that feels handcrafted, not generic.
+
+4. **Frictionless UX**: Creating an interface so intuitive that non-technical business owners could customize their sites without frustration.
+
+5. **Convincing Conversion**: Crafting a pitch that maximizes perceived value while minimizing objections and friction points (presentation, pricing, trust issues).
+
+These were the walls I needed to climb. Let me walk you through how I approached each one.
+
+## Sommaire
+
+- [Data Pipeline: Scraping & Enrichment](#data-pipeline-scraping--enrichment)
+- [Landing Page Generation (Next.js + AI)](#landing-page-generation-nextjs--ai)
+- [Automated Outreach](#automated-outreach)
+- [Results & Analysis](#results--analysis)
+- [What Worked vs. What Didn't](#what-worked-vs-what-didnt)
+- [Lessons Learned & Next Steps](#lessons-learned--next-steps)
+
+Below is a deep dive into my methodology, tech stack, and lessons learned.
+
+## Data Pipeline: Scraping & Enrichment
+
+I started by **collecting leads** for businesses in a target niche (initially beauty spas). For example, I scraped local directories and Google Places to get business names, addresses, and phone numbers. 
+To do so, I used **Outscraper**. My filter:
+
+* **Country :** France
+* **Categories :** beauty spa, massage, nails, etc.
+* **Website field blank** 👈 this is the most important
+
+These raw CSV files were the input to an **enrichment step**. 
+
+### Enrichment
+
+I built a simple web interface (see Fig. below) to upload a CSV of leads and let the system append missing info like email, website, or review snippets. Under the hood this involved calling various APIs and even an LLM to standardize names or infer descriptions. The goal was to transform a list of 0–“Institut Belle” into a fully detailed record ready for page generation. This pipeline mirrors *programmatic SEO* practices: using AI to automate the tedious parts of content creation.
+
+<Image src={enricher} width={1000} height={600} alt=""/>
+
+&#x20;*Figure 1: Lead CSV Enricher tool. I upload a raw business list and AI/API calls fill in details (left). Here it shows a batch of 912 leads with 6 processed – each row gets a template and contact info. This AI-driven enrichment replaced hours of manual research.*
+
+<Image src={flow} width={1000} height={600} alt=""/>
+
+
+These enrichment jobs ran as background tasks. For each lead I determined a **template** (e.g. "beauty spa") and saved status flags in a database. I logged progress (as shown above) and stored results in **Neon** – a serverless PostgreSQL database that scales effortlessly in the cloud.
+> Think of Neon DB as a self-expanding filing cabinet - every new business automatically gets its drawer. 
+
+Neon's on-demand nature let me spin up the database with zero ops. In practice, the DB held business data plus generated content (service lists, descriptions, etc.) keyed by a unique subdomain slug.
+```sql
+CREATE TABLE businesses (
+  id                serial PRIMARY KEY,
+  slug              text UNIQUE NOT NULL,
+  category          text NOT NULL,
+  name              text,
+  phone             text,
+  email             text,
+  address           text,
+  rating            numeric,
+  review_count      int,
+  img_url           text,
+  created_at        timestamptz DEFAULT now()
+);
+```
+
+
+## Landing Page Generation (Next.js + AI)
+
+### Dynamic Routing & Middleware
+
+With enriched data in hand, I moved to **page generation**. I chose Next.js for its dynamic routing and subdomain support. Each business got its own URL (e.g. `kingspa.ourdomain.com`), implemented via a Next.js middleware that rewrites subdomain requests to the appropriate page. In practice, the middleware extracts the subdomain (the spa's name) and rewrites the request to a dynamic route (`pages/[slug]/index.tsx`), loading content from my Neon DB. This multi-tenant setup is a proven pattern in Next.js for white-labeled apps.
+
+I wrote a middleware in order to serve **all** client sites from the same Next.js app. The middleware checks the subdomain and serves the appropriate page. 
+
+```ts
+// middleware.ts
+import { NextResponse, NextRequest } from "next/server";
+export function middleware(req: NextRequest) {
+  const host = req.headers.get("host") ?? "";
+  const [slug] = host.split(".");
+  const url  = req.nextUrl.clone();
+  url.pathname = `/_sites/${slug}`; // dynamic route
+  return NextResponse.rewrite(url);
+}
+```
+The middleware acts like a hotel concierge - reading your subdomain tag and escorting you to the right room
+### Template Registry & Component System
+
+React components are loaded from a registry by business category:
+
+```ts
+// templateRegistry.ts
+export const templateRegistry = {
+  beauty:   { Static: BeautyPage,   Editable: BeautyEditor },
+  barber:   { Static: BarberPage,   Editable: BarberEditor },
+  plumber:  { Static: PlumberPage,  Editable: PlumberEditor },
+  // …etc.
+};
+```
+
+### Page Design & Content Generation
+
+The page design used a simple template with sections like hero header, services, contact form, and testimonials. I populated these with a mix of scraped data and AI-generated copy. For example, the hero might say “Détendez-vous chez *King SPA*” (like the French spa page below), and services would list offerings with prices. All text was either taken from the business’s info or asked from my local LLM. I also added meta tags (Open Graph) so that when the SMS link is shared, a friendly preview image appears on phones.
+
+<Image src={template} width={1000} height={600} alt="Example of an AI-generated landing page for a fictional French spa business" />
+
+&#x20;*Figure 2: Example generated landing page (“King SPA”). This was auto-created for a fictional French spa. Notice the dynamic hero text, spa image, and service blocks – all tailored with AI. I even styled it to match a spa vibe. Hosting was done on Vercel, using Next.js dynamic routes and a Neon Postgres database for content.*
+
+### Live Editor Mode
+
+Each template comes with a **live editor mode** that lets business owners customize their site without touching code. I built this using React's Context API and a dead-simple reducer pattern. The editor intercepts changes (color picks, text edits, image uploads) and persists them to our database in real-time. No save button, no refresh — you change it, it's saved.
+
+<video width="100%" controls autoPlay muted loop>
+  <source src="https://www.instantsite.fr/edit.mp4" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+&#x20;*Figure 3: Live Editor in Action. The business owner can modify nearly everything while seeing changes instantly. Behind the scenes, I'm making API calls on each edit with 200ms debouncing to avoid hammering my backend. This feature alone got the most positive comments from testers.*
+
+### Dynamic Service Management
+
+The real magic happens with **dynamic service management**. Owners can add, edit, or remove their service offerings in seconds. This part of the editor was critical — my UX research showed that business owners became *emotionally invested* in their sites once they'd added their own services. It's a psychological hack: the more they customize, the more they feel ownership. One salon owner spent 15 minutes meticulously adding all her services with detailed descriptions and said, "This feels like *MY* site now."
+
+<video width="100%" controls autoPlay muted loop>
+  <source src="https://www.instantsite.fr/services.mp4" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+&#x20;*Figure 4: Service Editor Component. The interface lets owners drag-and-drop services, set prices, and add descriptions. Each edit recomputes the price display and reconfigures the layout for optimal mobile/desktop viewing. This is where I saw the most time spent by testers — they obsessed over getting their services just right.*
+
+Behind the scenes, the **Vercel AI SDK** glues my Next.js app to the model. I ran a local instance of the **DeepSeek** model (basically a distilled Qwen-14B LLM) via LM Studio on my machine. LM Studio made the model available over HTTP (see Fig. below), and I hooked it into Vercel's new AI framework as a custom provider. In fact, Vercel explicitly supports self-hosted models like LM Studio. Whenever I needed creative text (e.g. meta descriptions or service blurbs), the Next.js API routed a prompt to this local model through the AI SDK.
+
+### AI Integration with Vercel SDK
+
+```ts
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+
+const lmstudio = createOpenAICompatible({
+  name: 'lmstudio',
+  baseURL: 'http://localhost:1234/v1',
+});
+```
+
+I feed each business’s GMB metadata and get back JSON blocks:
+
+```json
+{
+  "slug": "les-fees-plume",
+  "sections": {
+    "hero": {
+      "title": "Transformez votre beauté avec Les Fées Plume",
+      "description": "Découvrez des soins personnalisés qui révèlent votre éclat naturel à Léognan."
+    },
+    "services": [{"name":"Soin du visage","price":60}],
+    "testimonials": [{"text":"Une expérience incroyable!","author":"Sophie L."}]
+  }
+}
+```
+
+<Image src={lmStudio} width={1000} height={600} alt="Sources de trafic des visiteurs dans PostHog montrant la domination du trafic direct via SMS" />
+
+&#x20;*Figure 3: LM Studio console running the DeepSeek model (Qwen-14B). I hosted this large language model locally (LM Studio → [http://127.0.0.1:1234](http://127.0.0.1:1234)) and used Vercel’s AI SDK to send requests for generating page text and content. The AI “brain” here writes the copy used in my landing page templates.*
+
+For images and media, I picked the client's own public pictures from Google, and also some free stock photos (like spa images from Unsplash) as a failover if the prior wasn't available. In short, I had a mini CMS: add lead → select template → generate page. All components (React, Next.js, Neon, Vercel functions) worked together to produce each page on demand, **at runtime**
+
+> **OG Image Hack :** I host static screenshots (`/og/slug.png`) and set them as `<meta property="og:image">`
+> <br /> iOS & Android fetch the image automatically, so the SMS shows a rich preview without paying MMS fees.
+
+## Automated Outreach
+
+Once pages were ready, the final step was **outreach**. I used **Brevo** to send SMS messages to all of my leads. Each message read something like "Hi! I made a free website preview for \[Business Name\]: \[link\]. Customize or publish if you like it!" I hoped the personal touch and the preview would entice clicks. SMS was chosen for its high engagement – after all, the *average SMS click-through rate is \~18%*, far above email. To aid trust, I included the business name and a casual tone (the messages were technically sent from my number, not an ad).
+
+Each SMS contained the subdomain link. Thanks to my meta tags, phones showed a nice preview image when they received it. I also set UTM parameters and integrated **PostHog** analytics on the site, so I could track visits and events (e.g. who clicked the “Edit page” button). I essentially ran an automated marketing campaign: Twilio (SMS) → custom URL → Next.js app → PostHog tracking.
+
+<Image src={brevo} width={1000} height={600} alt="Screenshot of Brevo SMS campaign dashboard showing outreach statistics" />
+
+## Trust concerns from SMS outreach
+
+To address potential trust concerns and reduce hesitation, I created a dedicated landing page at https://instantsite.fr explaining the entire approach. This page features a TikTok-style video of myself walking through the service, detailed feature descriptions, and clear information about GDPR compliance. This landing page serves as both a trust signal and a central hub for questions from interested business owners who want to learn more before committing.
+<video width="50%" style={{margin: "0 auto"}} controls autoPlay muted loop>
+  <source src="https://www.instantsite.fr/presentation.mp4" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+It is natural, simple, but straightforward and I hope it will help the leads to understand the approach.
+
+## Results & Metrics
+
+How did it go? I gathered data from PostHog and my logs:
+
+| Metric              | Value                     |
+| ------------------- | ------------------------- |
+| SMS sent            | **1 000**                 |
+| Delivery rate       | **89 %**                  |
+| Site visits         | **130**                   |
+| CTR                 | **\~ 16 %** *(130 / 808)* |
+| Cost per visit      | **\~ €0.35**              |
+| Edited sites        | **5**                     |
+| Checkouts started   | **3**                     |
+| Checkouts completed | **0**                     |
+| Bounce rate         | **68 %**                  |
+
+
+**Zero sales stung - until I realized I'd hacked human psychology. Those 5 edited sites proved owners WANT control, just not via cold SMS...**
+
+<Image src={visiters} width={1000} height={600} alt="Graphique PostHog montrant les utilisateurs actifs hebdomadaires sur 90 jours" />
+
+&#x20;*Figure 4: Weekly Active Users (WAU) over 90 days, from PostHog. I saw a spike (\~130 users) right after launch (early March), then a taper. The initial flurry corresponds to my outbound SMS blasts. After that, a small but steady trickle of visits continued.*
+
+The graph above shows **user engagement**. After my first campaign, about 120–140 unique users visited in that week, then activity slowly declined as the cold outreach warmed down. (I'd have to SMS more leads to sustain it.) A look at the channel breakdown revealed that the vast majority of this traffic was **Direct** (139 visits), meaning users clicked my SMS links or typed URLs directly【6†】. A small portion came from Organic Search (26 visits) – perhaps some curious owners googling themselves – and almost none via Referral.
+
+<Image src={channels} width={1000} height={600} alt="Sources de trafic des visiteurs dans PostHog montrant la domination du trafic direct via SMS" />
+
+&#x20;*Figure 5: Visitor Sources. PostHog data shows 245 page views from direct traffic (mostly SMS link clicks) vs. 38 from organic search. My outbound SMS clearly drove nearly all the visits.*
+
+Beyond raw traffic, I tracked on-page actions. Notably, many recipients who clicked in went on to click the "Edit" button on their landing page (an event I logged). This showed interest: business owners were exploring the preview site and even trying to customize the content. The click-through rate (CTR) on the SMS links was in line with industry stats (around **15–20%**, as reported averages). In short, people *did* look at the pages.
+
+However, **conversions were zero**. I had expected at least a few owners to "pay" (I included a dummy checkout for upgrading the page) or even fill a contact form. Instead, nobody completed the sale. Visits didn't translate into customers. After analyzing, I chalk this up to trust and context issues. Beauty spa owners, it turns out, are *very* hard to sell to this way. The cold SMS pitch sounded too unfamiliar, and many probably thought "another scam" or simply ignored it.
+
+### What Worked vs. What Didn’t
+
+* **✅ High Engagement (SMS CTR & Edits)**: My SMS campaign *did* capture attention. The 15–20% CTR was impressive and many recipients interacted with the page. The link previews and friendly copy seemed effective – recall that SMS average CTR is \~18%. Some owners even started editing their page, indicating real interest in the idea.
+
+* **✅ AI-generated Content**: The landing pages looked reasonably professional. Using AI to write intros and service descriptions saved huge time, matching anecdotal cases where companies generate hundreds of pages in days.
+
+* **✅ Dynamic Routing & Deployment**: The tech stack (Next.js + Neon on Vercel) proved solid. I successfully spun up many subdomains with no manual work.
+
+* **❌ No Conversions (Checkout)**: The biggest failure was a complete lack of sales or sign-ups. My call-to-action (pay €99 to launch the page) was apparently too aggressive. Even a free trial offer might've been better. In other words, *the funnel broke at the last step*.
+
+* **❓ Trust & Niche Misfit**: Beauty salons are a tough crowd. Many use big booking platforms like **Planity** (which already serves \~25% of French salons) and have established marketing channels. My cold intro likely felt redundant or even annoying to them. In hindsight, this niche had too many competing pitches and risk-averse owners.
+
+## Lessons Learned & Next Steps
+
+This experiment gave me a functional pipeline – now I can iterate. Key takeaways:
+
+* **Niche Matters**: Beauty spas were oversaturated with marketing pitches (Planity, Treatwell, etc.). No wonder my message got chilly reception. I plan to *pivot to other niches* next (e.g. plumbers, electricians, landscapers), where owners may be less inundated. In fact, I already scraped 1,200 plumbing/electrician leads waiting in the pipeline.
+* **Human Touch**: Automated pages need a bit of humanity. I'll add a short face-to-camera video in a modal (triggered after \~10 seconds) so visitors see a real person explaining the offer. A friendly face can build trust quickly.
+* **Lower Friction**: Instead of a hard checkout, I'll experiment with "freemium" or sponsorship models. For instance, let them publish the page for free if they agree to an email follow-up or a subtle sponsor ad.
+* **Customization Options**: I noticed some owners wanted to tweak things. In future, I'll let them preview changes live (colors, hero image, tagline) in the modal. More control over aesthetics might increase buy-in.
+* **Focus on Value**: I'll refine my pitch copy using AI (maybe sending follow-ups). And I might offer local SEO hints or analytics to make the proposition more concrete.
+
+In sum, my hackathon-level sprint built a surprisingly advanced system (Next.js + Neon + Vercel AI + LM Studio!) and got real human reactions. The results were mixed: strong interest but zero sales. But that's not a failure – it's insight. I learned *what doesn't work* (cold-pitching busy spa owners) as much as *what does* (SMS outreach and AI page gen). The project is far from dead. With adjustments and a new target industry, I'm ready for round two – this time with even more caffeinated code and hopefully a lot more conversions.
+
+Stay in touch for the step two of this project, that will hopefully convert this time !
+
+🚀 STEAL MY TECH STACK:
+- Lead Scraping: Outscraper ($0.03/lead)
+- AI: LM Studio + DeepSeek (Local, $0)
+- Hosting: Vercel + Neon (Free tier handles 1K sites)
+- Analytics: PostHog (OSS alternative to Mixpanel)
