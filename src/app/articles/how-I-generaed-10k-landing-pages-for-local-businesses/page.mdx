@@ -7,13 +7,14 @@ import visiters from './visiters.png'
 import lmStudio from './lm-studio.png'
 import channels from './channels.png'
 import enricher from './enricher.png'
+import leads from './leads.png'
 
 export const article = {
   author: 'Yannis Tocreau',
   date: '2025-05-09',
-  title: 'I’ll show you how I generated 10.000 landing pages for local businesses using Scraping tools, AI and Vercel and pitch them to them',
+  title: 'I built 10,000 AI landing pages BEFORE contacting clients: here’s what happened (Phase 1)',
   description:
-    'How I used AI, Next.js and automation to build & pitch custom landing pages to 10,000+ local businesses in France - with real metrics and lessons learned.',
+    'What if I built your website before we even met? Here is the phase 1 of my “10 000 landing pages, 10 000 leads” experiment: scraping, AI, Next.js, Vercel CLI sub-domains, SMS outreach—and why 0 sales won\'t demotivate me.',
   image: designSystem
 }
 
@@ -26,15 +27,39 @@ export default (props) => <ArticleLayout article={article} {...props} />
 
 <Image src={designSystem} alt="" />
 
-> "I build websites for local businesses by looking up their Google Business Profiles and contacting them directly—with the website already done."
+---
+
+> **"I build websites for local businesses by looking up their Google Business Profiles and contacting them directly—with the website already done."**
+> <br /> ~ A guy from Reddit
+
+---
+
+## What happens when you create the website **before** you pitch the client?
 
 This Reddit thread hit me like lightning: why not scale this to **10,000+ businesses**? What if I created their site first — and pitched it after?
 
 My journey began with this spark of inspiration. I wondered: *What if I could automatically build a custom website for a local business and then pitch it to them?* The idea was to go beyond simple programmatic SEO and actively *outreach* to potential clients with a personalized demo site. The result? A full-stack experiment that involved scraping leads, AI-powered content generation, dynamic Next.js pages, and automated SMS campaigns.
 
-To put this in perspective, France alone has over 1 million SMEs, and surprisingly, about 30% of them still don't have a website. That's a Total Addressable Market (TAM) of **300,000 businesses just in France!**
+Below is a deep dive into my methodology, tech stack, and lessons learned.
 
-**Picture this: 300,000 French businesses still don't have websites. That's like every resident of Bordeaux needing a site tomorrow. I built a machine to claim just 1% of that.**
+## Summary
+
+- [Targeting the market and setting the goal](#targeting-the-market-and-setting-the-goal)
+- [Data Pipeline: Scraping & Enrichment](#data-pipeline-scraping--enrichment)
+- [Landing Page Generation (Next.js + AI)](#landing-page-generation-nextjs--ai)
+- [Automated Outreach](#automated-outreach)
+- [Results & Analysis](#results--analysis)
+- [What Worked vs. What Didn't](#what-worked-vs-what-didnt)
+- [Lessons Learned & Next Steps](#lessons-learned--next-steps)
+
+--- 
+
+## Targeting the market and setting the goal
+
+France alone has over 1 million SMEs, and surprisingly, about 30% of them still don't have a website. That's a Total Addressable Market (TAM) of **300,000 businesses just in France!**
+
+> **Picture this: 300,000 French businesses still don't have websites. That's like every resident of Bordeaux needing a site tomorrow. I built a machine to claim just 1% of that.**
+
 
 Even with a modest 1% conversion rate, that's 3,000 potential clients. Scale this globally to other countries with similar digital adoption gaps, and you're looking at millions of businesses that could benefit from this approach. This is the kind of opportunity that gets me excited - even a tiny success rate could build a sustainable business.
 
@@ -52,16 +77,10 @@ Of course, turning this concept into reality meant tackling several critical cha
 
 These were the walls I needed to climb. Let me walk you through how I approached each one.
 
-## Sommaire
+**Goal, Phase 1:** build 1 000 personalised spa/beauty pages with zero human touch, cold-text the owners, and measure conversion.  
+If it works, repeat the playbook for Phase 2 : **10 K businesses.**
 
-- [Data Pipeline: Scraping & Enrichment](#data-pipeline-scraping--enrichment)
-- [Landing Page Generation (Next.js + AI)](#landing-page-generation-nextjs--ai)
-- [Automated Outreach](#automated-outreach)
-- [Results & Analysis](#results--analysis)
-- [What Worked vs. What Didn't](#what-worked-vs-what-didnt)
-- [Lessons Learned & Next Steps](#lessons-learned--next-steps)
 
-Below is a deep dive into my methodology, tech stack, and lessons learned.
 
 ## Data Pipeline: Scraping & Enrichment
 
@@ -71,6 +90,9 @@ To do so, I used **Outscraper**. My filter:
 * **Country :** France
 * **Categories :** beauty spa, massage, nails, etc.
 * **Website field blank** 👈 this is the most important
+
+After a few hours waiting, Outscrapper gave me 13k+ fresh leads of local SME that doesn't have a website (yet).
+<Image src={leads} alt="" />
 
 These raw CSV files were the input to an **enrichment step**. 
 
@@ -125,7 +147,12 @@ export function middleware(req: NextRequest) {
   return NextResponse.rewrite(url);
 }
 ```
+
 The middleware acts like a hotel concierge - reading your subdomain tag and escorting you to the right room
+
+> **Quick win:** every client slug became a live sub-domain via one `vercel domains add` batch—no dashboard clicking, no DNS headaches.  
+> The Vercel CLI turned sub-domain provisioning into a 20-second script, so scaling to 10 K sites is mostly an API-rate-limit problem, not an ops problem.
+
 ### Template Registry & Component System
 
 React components are loaded from a registry by business category:
@@ -242,12 +269,13 @@ How did it go? I gathered data from PostHog and my logs:
 | Checkouts completed | **0**                     |
 | Bounce rate         | **68 %**                  |
 
+A respectable **16 % CTR**, yet every Stripe session fizzled. The gap between “cool demo” and “paid customer” became Phase 2’s sole KPI.
 
 **Zero sales stung - until I realized I'd hacked human psychology. Those 5 edited sites proved owners WANT control, just not via cold SMS...**
 
 <Image src={visiters} width={1000} height={600} alt="Graphique PostHog montrant les utilisateurs actifs hebdomadaires sur 90 jours" />
 
-&#x20;*Figure 4: Weekly Active Users (WAU) over 90 days, from PostHog. I saw a spike (\~130 users) right after launch (early March), then a taper. The initial flurry corresponds to my outbound SMS blasts. After that, a small but steady trickle of visits continued.*
+&#x20;*Figure 4: Weekly Active Users (WAU) over 90 days, from PostHog. I saw a spike (\~130 users) right after launch (early March), then a taper. The initial flurry corresponds to my outbound SMS blasts. After that, people never came back.*
 
 The graph above shows **user engagement**. After my first campaign, about 120–140 unique users visited in that week, then activity slowly declined as the cold outreach warmed down. (I'd have to SMS more leads to sustain it.) A look at the channel breakdown revealed that the vast majority of this traffic was **Direct** (139 visits), meaning users clicked my SMS links or typed URLs directly【6†】. A small portion came from Organic Search (26 visits) – perhaps some curious owners googling themselves – and almost none via Referral.
 
@@ -275,18 +303,32 @@ However, **conversions were zero**. I had expected at least a few owners to "pay
 
 This experiment gave me a functional pipeline – now I can iterate. Key takeaways:
 
-* **Niche Matters**: Beauty spas were oversaturated with marketing pitches (Planity, Treatwell, etc.). No wonder my message got chilly reception. I plan to *pivot to other niches* next (e.g. plumbers, electricians, landscapers), where owners may be less inundated. In fact, I already scraped 1,200 plumbing/electrician leads waiting in the pipeline.
+* **Phase 1 ≠ failure—just calibration.** Spa owners were saturated by booking-platform pitches, so trust was DOA. Phase 2 pivots to electricians & plumbers, where digital fatigue is lower and urgency (broken boiler!) is higher.
 * **Human Touch**: Automated pages need a bit of humanity. I'll add a short face-to-camera video in a modal (triggered after \~10 seconds) so visitors see a real person explaining the offer. A friendly face can build trust quickly.
 * **Lower Friction**: Instead of a hard checkout, I'll experiment with "freemium" or sponsorship models. For instance, let them publish the page for free if they agree to an email follow-up or a subtle sponsor ad.
 * **Customization Options**: I noticed some owners wanted to tweak things. In future, I'll let them preview changes live (colors, hero image, tagline) in the modal. More control over aesthetics might increase buy-in.
 * **Focus on Value**: I'll refine my pitch copy using AI (maybe sending follow-ups). And I might offer local SEO hints or analytics to make the proposition more concrete.
 
-In sum, my hackathon-level sprint built a surprisingly advanced system (Next.js + Neon + Vercel AI + LM Studio!) and got real human reactions. The results were mixed: strong interest but zero sales. But that's not a failure – it's insight. I learned *what doesn't work* (cold-pitching busy spa owners) as much as *what does* (SMS outreach and AI page gen). The project is far from dead. With adjustments and a new target industry, I'm ready for round two – this time with even more caffeinated code and hopefully a lot more conversions.
+In sum, my hackathon-level sprint built a surprisingly advanced system (Next.js + Neon + Vercel AI + LM Studio!) and got real human reactions. The results were mixed: strong interest but zero sales. But that's not a failure – it's insight. I learned *what doesn't work* (cold-pitching busy spa owners) as much as *what does* (SMS outreach and AI page gen).
+
+This was never about spas. It was about proof.
+Now that the pipeline works, I’m taking it somewhere new: electricians and plumbers — where urgency beats aesthetics.
+The tech is ready. The strategy’s evolving. And I’ve got 1,200 pages queued up for Phase 2.
 
 Stay in touch for the step two of this project, that will hopefully convert this time !
 
-🚀 STEAL MY TECH STACK:
-- Lead Scraping: Outscraper ($0.03/lead)
-- AI: LM Studio + DeepSeek (Local, $0)
-- Hosting: Vercel + Neon (Free tier handles 1K sites)
-- Analytics: PostHog (OSS alternative to Mixpanel)
+## Phase 2 starts in May.  
+I’ll ship 1 200 pages to plumbers and electrictions, tweak the trust layer, and share every metric, even the embarrassing ones.
+
+→ **Follow [@tokuro34](https://x.com/tokuro34) on X** and I’ll send the debrief the moment it’s live.
+
+--- 
+
+🚀 Steal the stack (Phase 1 proven):
+1 Lead Scraper = Outscraper ($0.03/lead)  
+1 Local LLM = LM Studio + DeepSeek (FREE)  
+1 Hosting Hack = Vercel subdomains (No $10k cloud hosting bills)  
+1 Analytics Tool = PostHog (OSS FTW)  
+1 Humble Pie = Phase 1’s 0% conversion rate (Priceless)  
+
+---

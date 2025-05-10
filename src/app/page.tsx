@@ -8,6 +8,7 @@ import { Container } from '@/components/Container'
 import {
   GitHubIcon,
   LinkedInIcon,
+  XIcon,
 } from '@/components/SocialIcons'
 import logoAirbnb from '@/images/logos/airbnb.svg'
 import logoEdenred from '@/images/logos/edenred_logo.jpg'
@@ -261,6 +262,11 @@ export default async function Home() {
             href="https://www.linkedin.com/in/yannis-tocreau"
             aria-label="Follow on LinkedIn"
             icon={LinkedInIcon}
+          />
+           <SocialLink
+            href="https://x.com/tokuro34"
+            aria-label="Follow on X"
+            icon={XIcon}
           />
         </div>
       </div>
