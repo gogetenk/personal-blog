@@ -8,6 +8,7 @@ import lmStudio from './lm-studio.png'
 import channels from './channels.png'
 import enricher from './enricher.png'
 import leads from './leads.png'
+import smsTemplate from './sms-template.png'
 
 export const article = {
   author: 'Yannis Tocreau',
@@ -93,6 +94,8 @@ To do so, I used **Outscraper**. My filter:
 
 After a few hours waiting, Outscrapper gave me 13k+ fresh leads of local SME that doesn't have a website (yet).
 <Image src={leads} alt="" />
+
+I scrapped the name, picture, phone number, address, opening hours, the business type etc...
 
 These raw CSV files were the input to an **enrichment step**. 
 
@@ -243,6 +246,11 @@ Each SMS contained the subdomain link. Thanks to my meta tags, phones showed a n
 
 <Image src={brevo} width={1000} height={600} alt="Screenshot of Brevo SMS campaign dashboard showing outreach statistics" />
 
+<Image src={smsTemplate} alt="Example of SMS sent with a direct link to the personalized landing page" width={500} />
+
+&#x20;*Figure: Real example of a text message I sent to a spa owner. I used a neutral, respectful tone and included a direct link to a personalized site — in this case, a landing page for King SPA. The message also mentions that the page will be deleted in 15 days if not claimed, adding a light sense of urgency without being pushy.*
+
+
 ## Trust concerns from SMS outreach
 
 To address potential trust concerns and reduce hesitation, I created a dedicated landing page at https://instantsite.fr explaining the entire approach. This page features a TikTok-style video of myself walking through the service, detailed feature descriptions, and clear information about GDPR compliance. This landing page serves as both a trust signal and a central hub for questions from interested business owners who want to learn more before committing.
@@ -316,6 +324,8 @@ Now that the pipeline works, I’m taking it somewhere new: electricians and plu
 The tech is ready. The strategy’s evolving. And I’ve got 1,200 pages queued up for Phase 2.
 
 Stay in touch for the step two of this project, that will hopefully convert this time !
+
+> Here's en example of the generated landing pages (heavily modified) : https://kingass.vercel.app/?edit=true
 
 ## Phase 2 starts in May.  
 I’ll ship 1 200 pages to plumbers and electrictions, tweak the trust layer, and share every metric, even the embarrassing ones.
