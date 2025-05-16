@@ -48,7 +48,7 @@ const projects = [
     name: 'Digitime',
     description:
       'A simple way for freelancers to fill up their monthly timesheet, and for customers to approve them. This is a repetitive, mandatory step for all freelancers before sending an invoice.',
-    link: { href: 'https://digitime.app', label: 'https://digitime.app' },
+    link: { href: 'https://digitime.app', label: 'digitime.app' },
     logo: logoDigitime,
     technologies: ['Blazor WASM', 'Mongo DB']
   },{
@@ -57,7 +57,7 @@ const projects = [
       'A SaaS for tennis and padel clubs, combining yield management, flexible cancellations, and a universal loyalty program for small clubs and associations.',
     link: { href: '', label: 'coming soon...' },
     logo: logoPadelCompanion,
-    technologies: ['Blazor WebApp', 'Modular Monolith']
+    technologies: ['React + Next', '.NET Core 9', 'Modular Monolith']
   }
 ]
 
