@@ -1,0 +1,392 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+
+import codingAutomatedByAi from './coding-automated-by-ai.png'
+import llmInteractionsFlowchart from './llm-interactions-flowchart.png'
+import mcpsOfInfinity from './mcps-of-infinity.png'
+import developerEngineerCoder from './developer-engineer-coder.png'
+import justAiCodeIt from './just-ai-code-it.png'
+import rawPowerVsContextWindow from './raw-power-vs-context-window.png'
+import itTook5YearsForCompaniesToMakeAiNearlyAsCapableAsUs from './it-took-5-years-for-companies-to-make-ai-nearly-as-capable-as-us.png'
+import n8n from './n8n.webp'
+import mcpJira from './mcp-jira.png'
+import mcpWindsurf from './mcp-windsurf.png'
+import autonomousAiAgent from './autonomous-ai-agent.png'
+import pullrequestCreated from './pullrequest-created.png'
+import windsurfPlan from './windsurf-plan.png'
+
+export const article = {
+  author: 'Yannis Tocreau',
+  date: '2025-06-29',
+  title: 'How I automated 100% of my coder job using AI — from Jira tickets to Github PRs',
+  description:
+    'The era of the keyboard-bound developer is ending. With Model Context Protocol (MCP), I\'ve transformed coding from manual labor to AI orchestration — shifting from code producer to solution architect. Welcome to the new development paradigm where your skills as an engineer far outweigh your typing speed.',
+  image: codingAutomatedByAi,
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+<div className="image-with-caption">
+  <Image src={codingAutomatedByAi} alt="From a Jira ticket to a PR in 1min34 — My AI-driven MCP pipeline" />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>From a Jira ticket to a PR in 1min34 — My AI-driven MCP pipeline</em>
+</div>
+
+---
+
+The era of the keyboard-bound developer is ending. With Model Context Protocol (MCP), I\'ve transformed coding from manual labor to AI orchestration — shifting from code producer to solution architect. Welcome to the new development paradigm where your skills as an engineer far outweigh your typing speed.
+
+On 12 June 2025, I shipped a real life client feature in **1 minute 34 seconds** without touching VS. Zero keystrokes, two coffee sips – here’s how I almost fully automated coding (demo at the end).
+
+Over just a few years, artificial intelligence (AI) has evolved dramatically, transitioning from a mere playful gadget to an essential tool reshaping software development and productivity. Recently, I successfully automated and industrialized my daily coding workflow, completely integrating AI into my development cycle using advanced tools and the powerful Model Context Protocol (MCP).
+
+## From caveman to Einstein: the rapid rise of AI
+
+Five years, four model generations, ×120 context size. The silicon brain grew faster than my beard during COVID.
+
+The progression from GPT-3 to GPT-4 symbolizes AI’s astonishingly rapid advancement. Within five years, AI transformed from basic capabilities to nearly surpassing human performance. In stark contrast, human intelligence required billions of years to evolve to its current level. Despite these advancements, old biases about AI capabilities persist.
+
+<div className="image-with-caption">
+  <Image src={itTook5YearsForCompaniesToMakeAiNearlyAsCapableAsUs} alt="From Smart Monkeys to Nadine Morano, in billions of years... That's sad." />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>From Smart Monkeys to Nadine Morano, in billions of years... That's sad.</em>
+</div>
+
+## Raw power vs. context window: the real game changer
+
+While benchmark scores for AI reasoning (MMLU, GSM-8K, HumanEval) have plateaued, the context window—the amount of information an AI can process at once—is rapidly expanding. GPT-4.1 currently supports up to 1 million tokens, and Gemini 2.5 Pro will soon reach 2 million tokens, significantly enhancing AI's practical utility.
+
+<div className="image-with-caption">
+  <Image src={rawPowerVsContextWindow} alt="Context length window growth vs IQ growth for AI" />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>IQ is no longer an exponential curve, but context window is.</em>
+</div>
+
+**Key Takeaways:**
+
+* Context management increasingly matters more than raw reasoning power.
+* Leveraging extensive context windows greatly boosts AI capabilities.
+
+## The three pillars of AI utility: RAG, MCP, and agentic workflows
+
+Real-world AI productivity is maximized through three critical technologies:
+
+* **Retrieval-Augmented Generation (RAG):** Dynamically fetches relevant context, overcoming AI's inherent limitations.
+* **Model Context Protocol (MCP):** Acts as a secure interface (like a USB-C) for seamlessly connecting AI with diverse tools such as Jira, Azure DevOps, and GitHub.
+* **Agentic Workflows:** Enable AI autonomy to plan tasks, leverage integrated tools, and iteratively self-correct without constant human oversight.
+
+<div className="image-with-caption">
+  <Image src={llmInteractionsFlowchart} alt="LLM interactions flowchart" />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>LLM interactions flowchart</em>
+</div>
+
+
+Together, these technologies enable unprecedented automation and efficiency.
+
+**But how does this look in practice?** Let me walk you through a real-world implementation where I applied these principles to automate an entire development cycle - from ticket to pull request.
+
+## Practical demonstration: automating real-world development
+
+During my recent demonstration at Edenred, I showcased the complete automation of a feature’s lifecycle—from ticket creation through automated coding, testing, and pull request submission—using MCP-integrated tools.
+
+> Note: This is quite experimental. AI being non-deterministic, you might not get a good result every time. Always review the code yourself, as if your AI agent was a former accountant in the middle of a career change to become a junior React developer.
+
+## Step-by-step workflow
+
+In order to get started, you need to have a few things ready:
+
+### Step 0: MCP configuration and codingrules.md
+Here are a few things you need before getting started:
+
+- **MCP Configuration files:** 
+This file will give the AI agent access to your tools (Jira, GitHub, Azure DevOps, etc.)
+
+Example of content:
+
+```json
+{
+  "mcpServers": {
+    "azureDevOps": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@tiberriver256/mcp-server-azure-devops"
+      ],
+      "env": {
+        "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/xxxx",
+        "AZURE_DEVOPS_AUTH_METHOD": "pat",
+        "AZURE_DEVOPS_PAT": "xxxx",
+        "AZURE_DEVOPS_DEFAULT_PROJECT": "xxxx"
+      }
+    },
+    "mcp-atlassian": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "CONFLUENCE_URL",
+        "-e",
+        "CONFLUENCE_USERNAME",
+        "-e",
+        "CONFLUENCE_API_TOKEN",
+        "-e",
+        "JIRA_URL",
+        "-e",
+        "JIRA_USERNAME",
+        "-e",
+        "JIRA_API_TOKEN",
+        "ghcr.io/sooperset/mcp-atlassian:latest"
+      ],
+      "env": {
+        "CONFLUENCE_URL": "https://xxxx.atlassian.net/wiki",
+        "CONFLUENCE_USERNAME": "xxxx",
+        "CONFLUENCE_API_TOKEN": "xxxx",
+        "JIRA_URL": "https://xxxx.atlassian.net",
+        "JIRA_USERNAME": "xxxx",
+        "JIRA_API_TOKEN": "xxxx"
+      }
+    }
+  }
+}
+```
+
+Windsurf or Cursor will then show you the MCP Servers this way : 
+
+<div className="image-with-caption">
+  <Image src={mcpWindsurf} alt="MCP Servers" />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>MCP Servers in Windsurf</em>
+</div>
+
+- **codingrules.md**: 
+This file will contain all the rules you want to enforce on the AI agent. 
+It will be read by the AI agent at every step to ensure it follows the rules.
+
+Example of content:
+
+```plaintext
+# Coding Rules: Analyzer Error Reference
+
+This file documents key analyzer errors encountered in this repository. All developers should follow these rules to avoid common build and analyzer issues.
+
+---
+
+## ESM0006: Api model should be defined as record declaration
+- **Example:** `Api model 'CreateUserRequest' should be defined as record declaration`
+- **Resolution:**
+  - Use `record` instead of `class` for API models.
+  - Example: `public record CreateUserRequest { ... }`
+
+## CS1591: Missing XML documentation comments
+- **Example:** `The /doc compiler option was specified, but one or more constructs did not have comments.`
+- **Resolution:**
+  - Add XML summary comments to all public members, classes, and properties.
+  - Example:
+    /// <summary>
+    /// Represents a request to create a user.
+    /// </summary>
+    public record CreateUserRequest { ... }
+
+## ESM0002: Type name should be suffixed with ApiModel, not Dto
+- **Example:** `Type name 'UserRoleAssignmentDto' should not be suffixed with Dto but instead with ApiModel`
+- **Resolution:**
+  - Rename types ending with `Dto` to end with `ApiModel`.
+  - Example: `UserRoleAssignmentDto` → `UserRoleAssignmentApiModel`
+
+---
+
+## Summary Table
+| Severity | Code    | Description                                                       |
+|----------|---------|-------------------------------------------------------------------|
+| Error    | ESM0006 | Api model should be defined as record declaration                 |
+| Error    | CS1591  | Missing XML documentation comments                                |
+| Error    | ESM0002 | Type name should be suffixed with ApiModel, not Dto               |
+
+**Developers:** Please reference this file before submitting code or PRs. Fix all listed analyzer errors to ensure codebase consistency and successful builds.
+
+```
+
+- **architecture.md**: 
+Just like the **codingrules.md**, this file will contain all the architecture-related rules you want to enforce on the AI agent. 
+This file might help the AI agent to understand the architecture of the project and to ensure it doesn't break it.
+
+---
+
+
+## Prompt example:
+
+```plaintext
+You have full MCP access.
+
+❶ Pull JIRA ticket LTT-16225.  
+❷ Analyse and summarise its acceptance criteria in bullet points.  
+❸ Scan the repo and analyze the existing business rules and code structure. Remember to read the readme.md if any, and the codingrules.md. 
+❹ Once you analyzed the functional need, and the existing code, produce a single, ordered execution plan that covers:
+   • design of the new flow OR bug fix
+   • creation of the needed code and/or refactoring
+   • refactor existing code if needed
+   • unit + integration tests if applicable (either refactor or create new)
+   • dotnet build at every step to check no regression was included
+   • README updates 
+End with: “PLAN READY – awaiting GO”.
+```
+
+<div className="image-with-caption">
+  <Image src={mcpJira} alt="Jira ticket analysis" />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>Jira ticket analysis</em>
+</div>
+
+**Step 2: Automated Codebase Exploration and Planning**
+
+AI autonomously scans and analyzes existing business logic, generating a structured execution plan.
+
+<div className="image-with-caption">
+  <Image src={windsurfPlan} alt="Windsurf agent plan" />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>Windsurf agent is planning his own tasks and will iterate on it</em>
+</div>
+
+**Step 3: MCP-driven Automation and IDE Integration**
+
+The AI autonomously performs the planned development without human intervention:
+
+Prompt used:
+
+```plaintext
+GO.
+
+Follow your plan end-to-end WITHOUT further user input.
+
+Constraints
+• Language: English only.  
+• Comments: keep only what is strictly needed for maintainability (mostly xml summaries on publics).
+• Code style: .NET 9 conventions, SOLID, clean code, async/await where relevant.  
+• Tests ONLY IF NEEDED: xUnit, clear Arrange-Act-Assert, >80 % coverage on new code, IF APPLICABLE. Don't over-engineer.
+• Repeat build-test cycle until `dotnet build` and `dotnet test` both succeed with zero failures.  
+• No TODOs or dead code.
+• Before writing a new code, always make sure you already checked how it is already done in the same project 
+(ex: if you need to write a new unit test, check how the unit tests are already made in the same repo, and keep the consistency for naming, coding conventions, librairies, architecture, patterns etc...)
+• You are on a windows environment using powershell for commands
+• Don't re-invent the wheels. Focus on bringing the value, boy scout rule, but also keep it stupid simple. For example don't create a feature flag if not asked in the ticket.
+• Do NOT over-engineer, do NOT over-test, 100% code coverage is not expected. KISS.
+• Do NOT use automapper or any mapper. Make the mappings manually
+• ALWAYS think about adding the necessary usings instructions when needed
+
+
+When all green:
+   → create branch `feature/LTT-ticketnumber-description` or `bugfix/LTT-ticketnumber-description`
+   → push to origin respecting conventional commit like this pattern : "feat: doing this and that #LTT-ticketnumber" (or fix: ...)
+   → open Azure DevOps PR back to `develop`
+   → PR description must include: summary, bullet list of changes, how to test locally, link to ticket.
+
+Finish with: “PR CREATED – done”.
+
+
+```
+
+<div className="image-with-caption">
+  <Image src={autonomousAiAgent} alt="Autonomous AI agent" />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>The AI agent is autonomously performing the planned development with limited human intervention</em>
+</div>
+
+**Step 4: MCP-driven automated branching and pull requests**
+
+The AI autonomously:
+
+* Creates a branch with clear naming conventions - even robot-interns need branch policies !
+* Generates a pull request including summary, changes, test instructions, and ticket link
+
+<div className="image-with-caption">
+  <Image src={pullrequestCreated} alt="Pull request created" />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>The AI agent autonomously created a pull request</em>
+</div>
+
+**Key Takeaways:**
+
+* AI automates the full software development lifecycle effectively.
+* Precise MCP configuration and prompt structuring is crucial.
+* Human oversight remains essential for ensuring quality.
+
+## Tool Integration: The Ultimate Measure of AI Success
+
+Today, the true measure of AI success is not raw computational ability, but rather how well AI integrates with existing tools and workflows. AI integration with practical developer tools (e.g., Azure DevOps, Jira, GitHub) is now the primary driver of productivity gains.
+
+<div className="image-with-caption">
+  <Image src={mcpsOfInfinity} alt="MCPs of Infinity" />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>MCPs of Infinity: together, they enable unprecedented automation and efficiency.</em>
+</div>
+
+## Best practices for MCP-driven AI excellence
+
+For optimal AI performance, clear and structured inputs are essential:
+
+* **Product owners:** Provide detailed user stories with clear acceptance criteria and linked documentation.
+* **Developers:** Develop precise prompts, clearly defining context, objectives, and constraints.
+* **Continuous improvement:** Regularly refine documentation and AI prompting strategies to sustain and enhance collaboration quality.
+* **Garbage in = garbage out.** MCP won’t fix vague specs or half-baked acceptance criteria. Document like an adult.
+
+The fundamental principle is clear: the quality of AI outputs is directly proportional to the clarity and precision of its inputs.
+
+## Exploring the next frontier: fully autonomous agentic workflows
+
+<div className="image-with-caption">
+  <Image src={n8n} alt="Fully autonomous agentic workflows" />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>Fully autonomous agentic workflows that can get triggered automatically</em>
+</div>
+
+Currently, tools like Windsurf represent near-autonomous AI agents that still require human triggers and oversight. A promising future lies in fully autonomous agentic workflows, enabled by platforms such as n8n. Imagine an AI agent that:
+- listens to Jira webhooks and then creates the requested feature when a new ticket is assigned 
+- automatically reviews code produced by the coding agent
+- subscribes to Datadog alerts and autonomously creating bug tickets, thus triggering the entire automation chain explained above.
+
+### Horizontal scaling: an army of AI developers at your command
+
+The next evolution is already beginning with tools like Cursor's latest feature, which deploys containerized AI agents in the cloud to work autonomously on your codebase. But this is just the beginning. The future will bring horizontal scaling of these agents—imagine dozens of specialized AI developers working in parallel, each on its own branch, tackling different aspects of your codebase simultaneously.
+
+This distributed approach could transform development velocity in ways we can barely imagine today:
+
+- Ten specialized agents could simultaneously implement different features across your application
+- Each agent would work in isolation on its own branch, preventing conflicts
+- Core architecture agents could review and optimize foundational code while feature agents build on top
+- Testing agents could continuously validate changes as they're proposed
+
+The result? Your team might soon be reviewing dozens of high-quality PRs per hour—far more than any human team could possibly handle. At that scale, you'll need AI review agents just to keep up with your AI developers. The ultimate irony: AI reviewing AI, with humans serving primarily as final approvers and strategic directors.
+
+The possibilities are immense, especially as language models become increasingly intelligent, better integrated, and more independent.
+
+## Is AI coding better than a coder?
+
+<div className="image-with-caption">
+  <Image src={justAiCodeIt} alt="Just AI Code It" />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>Man, just AI code it</em>
+</div>
+
+The provocative question on everyone's mind: Is AI better at coding than humans? **The answer is increasingly yes**—but with crucial caveats.
+
+AI excels at the mechanical aspects of coding: syntax perfection, pattern implementation, and tireless refactoring. It doesn't get tired after 8 hours, doesn't need coffee breaks, and won't argue about tabs versus spaces. It can instantly leverage patterns from millions of codebases and apply them with perfect consistency.
+
+But what AI lacks is understanding of the *why* behind the code. It doesn't grasp business priorities, stakeholder needs, or the human impact of technical decisions. Without human guidance, AI will happily build elaborate solutions to misunderstood problems—the coding equivalent of constructing a perfect bridge to the wrong shore.
+
+The optimal approach isn't human OR machine, but human AND machine—with humans focusing on the higher-order engineering questions that require judgment, while delegating the mechanical translation of those decisions to AI systems.
+
+## The future developer: Engineering over coding
+
+<div className="image-with-caption">
+  <Image src={developerEngineerCoder} alt="The future developer: Engineering over coding" />
+  <em className="caption" style={{textAlign: 'center', display: 'block'}}>The future developer: engineering over coding</em>
+</div>
+
+As we embrace these AI-driven workflows, it's crucial to recognize how our roles as developers are fundamentally changing. In my view, the traditional developer role has always been split between two distinct functions: 50% coding and 50% engineering. The coding aspect—translating business requirements into syntax—will inevitably be fully automated by AI systems, perhaps sooner than we expect.
+
+This evolution isn't surprising or concerning; programming languages were originally created as human-machine interfaces. Now, AI has become that interface. The translation layer no longer needs human intermediaries.
+
+What remains irreplaceable, however, is the engineering mindset: deep domain knowledge, architectural vision, business understanding, and the ability to solve complex problems within specific contexts. These aspects require human judgment, creativity, and experience that AI cannot replicate (for now).
+
+For developers navigating this transition, the imperative is clear: lean into your engineering identity. Deepen your industry expertise, strengthen your understanding of business problems, and develop the strategic thinking that transforms you from a code producer to a solution architect.
+
+The most valuable developers of tomorrow won't be those who write the best code—AI will handle that—but those who can articulate the right problems to solve and guide AI systems toward meaningful solutions.
+
+As you've seen in this demonstration, we're already crossing this threshold. The question isn't whether AI will replace coding tasks, but how quickly we'll adapt our professional identities to thrive in this new reality.
+
+What's your next step in this evolution?
