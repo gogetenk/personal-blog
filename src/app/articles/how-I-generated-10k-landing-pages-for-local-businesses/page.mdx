@@ -22,6 +22,18 @@ export const article = {
 export const metadata = {
   title: article.title,
   description: article.description,
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    images: [
+      {
+        url: './how-I-generaed-10k-landing-pages-for-local-businesses2.png',
+        width: 1200,
+        height: 630,
+        alt: 'I built 10,000 AI landing pages BEFORE contacting clients'
+      }
+    ],
+  },
 }
 
 export default (props) => <ArticleLayout article={article} {...props} />
