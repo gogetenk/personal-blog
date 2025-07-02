@@ -13,6 +13,18 @@ export const article = {
 export const metadata = {
   title: article.title,
   description: article.description,
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    images: [
+      {
+        url: './blazor.png',
+        width: 1200,
+        height: 630,
+        alt: 'Blazor 8 InteractiveAuto & Authentication'
+      }
+    ],
+  },
 }
 
 export default (props) => <ArticleLayout article={article} {...props} />

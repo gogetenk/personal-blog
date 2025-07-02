@@ -20,6 +20,18 @@ export const article = {
 export const metadata = {
   title: article.title,
   description: article.description,
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    images: [
+      {
+        url: './best-places-remote-work.png',
+        width: 1200,
+        height: 630,
+        alt: 'Best places I\'ve remote worked from'
+      }
+    ],
+  },
 }
 
 export default (props) => <ArticleLayout article={article} {...props} />

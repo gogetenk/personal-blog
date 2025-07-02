@@ -26,6 +26,18 @@ export const article = {
 export const metadata = {
   title: article.title,
   description: article.description,
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    images: [
+      {
+        url: './coding-automated-by-ai.png',
+        width: 1200,
+        height: 630,
+        alt: 'How I automated 100% of my coder job using AI'
+      }
+    ],
+  },
 }
 
 export default (props) => <ArticleLayout article={article} {...props} />
